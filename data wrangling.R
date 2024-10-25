@@ -46,3 +46,14 @@ my_presidents |>
     avg_term_length = mean(term_length)
   )
 
+my_presidents %>% 
+  group_by(party) |>
+  summarise(
+    N= n(),
+    first_year = min(year(start)),
+    last_year = max(year(end)),
+    num_dems = sum(party == "Democrats"),
+    years = sum(term_length),
+    avg_term_length = mean(term_length)
+  )
+
