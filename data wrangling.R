@@ -56,4 +56,3 @@ my_presidents %>%
     years = sum(term_length),
     avg_term_length = mean(term_length)
   )
-
