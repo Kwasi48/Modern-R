@@ -164,10 +164,13 @@ babynames |> group_by(n) |> summarize(ave = mean(n))
 babynames |> group_by(n > 100) |> summarize(total = sum(n))
 
 library(tidyverse)
+
+head(mtcars)
 mtcars |>
+  filter(am == 1) |>
   group_by(cyl) |>
-  summarize(avg_mpg = mean(mpg)) |>
-  filter(am == 1)
+  summarize(avg_mpg = mean(mpg)) 
+
 
 Teams
 
