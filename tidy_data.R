@@ -36,4 +36,51 @@ babynames |>
 babynames |>
   filter(name == "Robin") |>
   group_by(name, sex) |>
-  summarize(total = sum(n), .groups = "drop")
+  summarize(total=sum(n), .groups = "drop")
+
+babynames |> 
+  filter( name %in% c("Sue", "Robin", "Leslie")) |>
+  group_by(name, sex) |>
+  summarize(total = sum(n)) |>
+  pivot_wider(
+    names_from = sex,
+    values_from = total
+  )
+
+baby_wide <- babynames |>
+  group_by(sex, name) |>
+  summarize(total = sum(n), .groups = "drop") |>
+  pivot_wider(
+    names_from = sex, 
+    values_from = total, 
+    values_fill = 0
+  )
+head(baby_wide, 3)
+
+baby_wide |> 
+  filter(M > 50000, F > 50000) |> 
+  mutate(ratio = pmin(M / F, F / M)) |>
+  arrange(desc(ratio)) |>
+  head(3)
+
+
+mdsr_url <- "https://raw.githubusercontent.com/mdsr-book/mdsr/master/data-raw/"
+houses <- mdsr_url |>
+  paste0("houses-for-sale.csv") |>
+  read_csv()
+head(houses, 3)
+
+
+library(rvest)
+url <- "http://en.wikipedia.org/wiki/Mile_run_world_record_progression"
+tables <- url |>
+  read_html() |>
+  html_nodes("table")
+
+length(tables)
+head(tables)
+
+amateur <- tables |>
+  purrr::pluck(3) |>
+  html_table()
+amateur
