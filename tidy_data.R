@@ -84,3 +84,146 @@ amateur <- tables |>
   purrr::pluck(3) |>
   html_table()
 amateur
+
+records <- tables |>
+  purrr::pluck(5) |>
+  html_table() |>
+  select(-Auto)  |> # remove unwanted column 
+  arrange(desc(Athlete))
+records
+
+
+translations <- mdsr_url |>
+  paste0("house_codes.csv") |>
+  read_csv()
+translations |> 
+  head(5)
+
+codes <- translations |>
+  pivot_wider(
+    names_from = system_type, 
+    values_from = meaning, 
+    values_fill = "invalid"
+  )
+codes
+
+houses <- houses |>
+  left_join(
+    codes |>
+      select(code, fuel_type), 
+    by = c(fuel = "code")
+  ) |>
+  left_join(
+    codes |> 
+      select(code, heat_type), 
+    by = c(heat = "code")
+  ) |>
+  left_join(
+    codes |> 
+      select(code, sewer_type), 
+    by = c(sewer = "code")
+  )
+houses
+
+ordway_birds |>
+  select(Timestamp, Year, Month, Day) |>
+  glimpse()
+
+library(readr)
+ordway_birds <- ordway_birds |>
+  mutate(
+    Month = parse_number(Month),
+    Year = parse_number(Year),
+    Day = parse_number(Day),
+  )
+
+ordway_birds |> 
+  select(Timestamp, Year, Month, Day) |>
+  glimpse()
+
+library(lubridate)
+birds <- ordway_birds |>
+  mutate(When = mdy_hms(Timestamp)) |>
+  select(Timestamp, Year, Month, Day, When, DataEntryPerson)
+birds |>
+  glimpse()
+
+birds |>
+  ggplot(aes(x = When, y = DataEntryPerson)) + 
+  geom_point(alpha = 0.1, position = "jitter") 
+
+bird_summary <- birds |>
+  group_by(DataEntryPerson) |>
+  summarize(
+    start = first(When), 
+    finish = last(When)
+  ) |>
+  mutate(duration = interval(start, finish) / ddays(1))
+bird_summary
+
+
+now()
+class(now())
+
+class(as.POSIXlt(now()))
+as.Date(now())
+
+
+library(lubridate)
+example <- c("2021-04-29 06:00:00", "2021-12-31 12:00:00")
+str(example)
+
+converted <- ymd_hms(example)
+str(converted)
+
+converted
+
+converted[2] - converted[1]
+
+#Japanese Reactors
+tables <- "https://en.wikipedia.org/wiki/List_of_commercial_nuclear_reactors" |>
+  read_html() |>
+  html_nodes(css = "table")
+
+idx <- tables |>
+  html_text() |>
+  str_detect("Fukushima Daiichi") |>
+  which()
+
+reactors <- tables |>
+  purrr::pluck(idx) |>
+  html_table(fill = TRUE) |>
+  janitor::clean_names() |>
+  rename(
+    reactor_type = type,
+    reactor_model = model,
+    capacity_net = capacity_mw
+  ) |>
+  tail(-1)
+
+glimpse(reactors)
+
+
+reactors <- reactors |>
+  mutate(
+    plant_status = ifelse(
+      str_detect(status, "Shut down"), 
+      "Shut down", "Not formally shut down"
+    ), 
+    construct_date = dmy(beginbuilding), 
+    operation_date = dmy(commercialoperation), 
+    closure_date = dmy(closed)
+  )
+
+glimpse(reactors)
+
+
+ggplot(
+  data = reactors, 
+  aes(x = construct_date, y = capacity_net, color = plant_status
+  )
+) +
+  geom_point() + 
+  geom_smooth() + 
+  xlab("Date of Plant Construction") + 
+  ylab("Net Plant Capacity (MW)")
