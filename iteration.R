@@ -71,3 +71,44 @@ angels_names |>
   group_by(teamID, name) |>
   summarise(N = n(), means_wins= mean(W)) |>
   arrange(desc(means_wins))
+
+exp_wpct <- function(x) { 
+  return(1/(1 + (1/x)^2))
+}
+
+TeamRuns <- Teams |> 
+  filter(yearID >= 1954) |>
+  rename(RS = R) |> 
+  mutate(WPct = W / (W + L), run_ratio = RS/RA) |>
+  select(yearID, teamID, lgID, WPct, run_ratio)
+
+ggplot(data = TeamRuns, aes(x = run_ratio, y = WPct)) +
+  geom_vline(xintercept = 1, color = "darkgray", linetype = 2) +
+  geom_hline(yintercept = 0.5, color = "darkgray", linetype = 2) +
+  geom_point(alpha = 0.2) + 
+  stat_function(fun = exp_wpct, linewidth = 2, color = "blue") + 
+  xlab("Ratio of Runs Scored to Runs Allowed") + 
+  ylab("Winning Percentage")
+
+TeamRuns |>
+  nls(
+    formula = WPct ~ 1/(1 + (1/run_ratio)^k), 
+    start = list(k = 2)
+  ) |>
+  coef()
+
+fit_k <- function(x) {
+  mod <- nls(
+    formula = WPct ~ 1/(1 + (1/run_ratio)^k), 
+    data = x,
+    start = list(k = 2)
+  )
+  return(tibble(k = coef(mod), n = nrow(x)))
+}
+
+fit_k(TeamRuns)
+
+TeamRuns |> 
+  mutate(decade = yearID %/% 10 * 10) |>
+  group_by(decade) |> 
+  group_modify(~fit_k(.x))
