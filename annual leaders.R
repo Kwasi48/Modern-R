@@ -57,3 +57,55 @@ k_actual |>
 ggplot(data=k_actual,aes(x=k)) + 
   geom_density() +
   xlab("Best fit exponent for a single season")
+
+n <- 10000
+
+bstrap <- 1:n |>
+  map_dbl(
+    ~k_actual |>
+      pull(k) |>
+      sample(replace = TRUE) |>
+      mean()
+  )
+
+civals <- bstrap |>
+  quantile(probs = c(0.025, .975))
+
+civals
+
+
+ggplot(data = enframe(bstrap, value = "k"), aes(x = k)) + 
+  geom_density() + 
+  xlab("Distribution of resampled means") + 
+  geom_vline(
+    data = enframe(civals), aes(xintercept = value),
+    color = "red", linetype = 3
+  )
+
+
+#BMI
+
+library(NHANES)
+ ggplot(NHANES, aes(x=Age, y = BMI)) + 
+  geom_point() + 
+   geom_smooth()
+ 
+ 
+ bmi_plot <- function(.data, x_var) {
+   ggplot(.data, aes(y = BMI)) + 
+     aes_string(x = x_var) + 
+     geom_jitter(alpha = 0.3) + 
+     geom_smooth() + 
+     labs(
+       title = paste("BMI by", x_var),
+       subtitle = "NHANES",
+       caption = "US National Center for Health Statistics (NCHS)"
+     )
+ }
+bmi_plot(NHANES, "Age")
+
+
+c("Age", "HHIncomeMid", "PhysActiveDays", 
+  "TVHrsDay", "AlcoholDay", "Pulse") |>
+  map(bmi_plot, .data = NHANES) |>
+  patchwork::wrap_plots(ncol = 2)
