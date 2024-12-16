@@ -116,3 +116,13 @@ library(mosaicData)
 data("HELPrct")
 view(HELPrct)
 View(HELPrct)
+
+
+HELPrct |> 
+  summarise(
+    across(
+      where(is.numeric), function(x) mean(x, na.rm = TRUE)
+    )
+  )
+
+glimpse(nycflights)  
