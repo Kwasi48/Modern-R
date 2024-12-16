@@ -109,3 +109,10 @@ c("Age", "HHIncomeMid", "PhysActiveDays",
   "TVHrsDay", "AlcoholDay", "Pulse") |>
   map(bmi_plot, .data = NHANES) |>
   patchwork::wrap_plots(ncol = 2)
+
+
+#exercise 1
+library(mosaicData)
+data("HELPrct")
+view(HELPrct)
+View(HELPrct)
