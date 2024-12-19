@@ -1,7 +1,7 @@
 #statistics foundation 
 
-library(tidyvese)
-library(msdr)
+library(tidyverse)
+library(mdsr)
 library(nycflights13)
 
 SF <- flights |>
