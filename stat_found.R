@@ -84,3 +84,11 @@ sf_25_means |>
   geom_histogram(bins = 30) + 
   facet_grid( ~ n) + 
   xlab("Sample mean")
+
+#bootstrap
+three_flights <- SF |> 
+  slice_sample(n = 3, replace = TRUE) |>
+  select(year, month, day, dep_time)
+
+three_flights
+three_flights |> slice_sample(n = 3, replace = TRUE)
